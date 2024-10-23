@@ -187,7 +187,7 @@ async def create_files(title: str = Form(...), author: str = Form(...), theme: s
                 </div>
             </div>
             <div class="footer">                                 
-                Situs ini dibuat dengan <b>Pure</b>
+                This site is created with <b>Pure</b>
             </div>                                               
             <script>
             function Load() {
