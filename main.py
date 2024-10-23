@@ -4,7 +4,7 @@ async def app(scope, receive, send):
     ...
 
 if __name__ == "__main__":
-    uvicorn.run("main:slides", port=5000, log_level="info")
+    uvicorn.run("main:slides", port=5000, host='172.17.0.1', log_level="info")
 
 import generation
 from fastapi import FastAPI, Form, Request
