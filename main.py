@@ -86,11 +86,11 @@ async def create_files(title: str = Form(...), author: str = Form(...), theme: s
                     <div id="prompt" class="pure-u-1 pure-u-xl-1-2">
                         <div class="mid">
                             <h2>Prompt:</h2>
-                            <embed src="../files/presentation.html">
+                            <embed src="../static/files/presentation.pdf">
                             <div class="pure-g">
                             <div class="pure-u-1 pure-u-md-1-2">
                                 <span class="button">
-                                <a href="../files/presentation.pdf">
+                                <a href="../static/files/presentation.pdf">
                                     <span class="button-background"></span>
                                     <span class="button-text">presentation.pdf</span>
                                 </a>
@@ -98,7 +98,7 @@ async def create_files(title: str = Form(...), author: str = Form(...), theme: s
                             </div>
                             <div class="pure-u-1 pure-u-md-1-2">
                                 <span class="button">
-                                <a href="../files/presentation.ppt">
+                                <a href="../static/files/presentation.ppt">
                                     <span class="button-background"></span>
                                     <span class="button-text">presentation.ppt</span>
                                 </a>
