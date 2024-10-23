@@ -1,6 +1,5 @@
 import random
 import os
-from gradio_client import Client
 from openai import OpenAI
 from dotenv import load_dotenv                                 
 

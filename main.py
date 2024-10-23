@@ -24,7 +24,7 @@ slides.mount("/static", StaticFiles(directory="static"), name="static")
 async def create_files(title: str = Form(...), author: str = Form(...), theme: str = Form(...)):
                                                                                           
         generator = generation.Generator()
-        generator.generate_presentation(title, author, chosen_theme)
+        generator.generate_presentation(title, author, theme)
         chatcontent = """<!DOCTYPE html>                                                                                       
         <html lang="en">
         <head>
