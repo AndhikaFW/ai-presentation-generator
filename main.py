@@ -28,7 +28,7 @@ async def create_files(title: str = Form(...), author: str = Form(...), theme: s
         chatcontent = """<!DOCTYPE html>                                                                                       
         <html lang="en">
         <head>
-            <title>📚 Chat dengan dokumen</title>
+            <title>📚 Slides</title>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <link href="../static/css/styles.css" rel="stylesheet">
