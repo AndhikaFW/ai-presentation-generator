@@ -1,7 +1,8 @@
 import random
-from gradio_client import Client
 import os
-
+from gradio_client import Client
+from openai import OpenAI
+from dotenv import load_dotenv                                 
 
 class Generator(object):
 
@@ -9,6 +10,26 @@ class Generator(object):
                                        title: str,
                                        author: str = "",
                                        theme: str = ""):
+        def predict(prompt: str, META_PROMPT: str, max_tokens: float, temperature: float):
+            load_dotenv()                                  
+            api_key = os.getenv("OPENAI_API_KEY")                       
+            client=OpenAI()
+            completion = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": META_PROMPT,
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    },
+                ],
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+            return completion.choices[0].message.content
         """
         Generates a Marp presentation with the given title, author, and theme.
 
@@ -21,27 +42,16 @@ class Generator(object):
             str: The generated presentation in markdown format.
         """
         theme = theme or "default"
-        start_prompt = f"Start your message exactly with the following:\n'Sure! Here is a long presentation on the topic {title}:\n## 1 ...' The title slide has already been added, so just start adding main content. Syntax: add slide headings with `## <slide number>: <slide heading>` and divide slides with `---`; add base slide text without formatting under headings. Add images using the following syntax: `![](https://source.unsplash.com/random/?<only one search keyword here>)`. One heading, one base text, and one image per slide. Remember to divide slides with `---`. Put LITTLE OF TEXT in each slide and remember to divide slides with ---. VERY LITTLE of text per slide, only a few sentences. The heading, base text, and the image are always on the same slide. Don't stop creating slides until the user tells you to. Just keep creating slides one by one and don't stop at all, and don't forget to separate slides with `---`."
+        start_prompt = f"Start your message exactly with the following:\n'Sure! Here is a long presentation on the topic {title}:\n## 1 ...' The title slide has already been added, so just start adding main content. Syntax: add slide headings with `## <slide number>: <slide heading>` and divide slides with `---`; add base slide text without formatting under headings. Add images using the following syntax: `![](https://loremflickr.com/960/1080/<If it is a product only two unseparated search keywords here and dont use space or separator else only one search keyword here>)`. One heading, one base text, and one image per slide. Remember to divide slides with `---`. Put LITTLE OF TEXT in each slide and remember to divide slides with ---. VERY LITTLE of text per slide, only a few sentences. The heading, base text, and the image are always on the same slide. Don't stop creating slides until the user tells you to. Just keep creating slides one by one and don't stop at all, and don't forget to separate slides with `---`."
         system_prompt = "You should create a full long Marp presentation on the given theme. DO NOT use html elements, only basic markdown, images and text. DO NOT put lots of text in one slide. Fill each slide with meaningful content. DO NOT write any other text else except what the user tells you to. Divide slides with ---. Put very little text in each slide. VERY LITTLE of text per slide, only a few sentences. ADD AN IMAGE TO EACH AND EVERY SLIDE. Just keep creating slides, one by one, until the user tells you to stop. Separate slides with `---`."
         presentation_start = (
             f"---\nmarp: true\ntheme: {theme}\n_class: lead invert\n---\n\n# {title}\n"
         )
         presentation_start += f"by {author}\n\n---\n" if author else "\n---\n"
 
-        client = Client("huggingface-projects/llama-2-13b-chat")
-
         # Generate first part
         print("Generating the first part...")
-        first_part = client.predict(
-            start_prompt,  # str  in 'Message' Textbox component
-            system_prompt,  # str  in 'System prompt' Textbox component
-            2048,  # float (numeric value between 1 and 2048) in 'Max new tokens' Slider component
-            0.1,  # float (numeric value between 0.1 and 4.0) in 'Temperature' Slider component
-            0.05,  # float (numeric value between 0.05 and 1.0) in 'Top-p (nucleus sampling)' Slider component
-            1,  # float (numeric value between 1 and 1000) in 'Top-k' Slider component
-            1,  # float (numeric value between 1.0 and 2.0) in 'Repetition penalty' Slider component
-            api_name="/chat",
-        )
+        first_part = predict(start_prompt, system_prompt, 2048, 0.1)
 
         print(f"First part:\n{first_part}")
 
@@ -58,16 +68,12 @@ class Generator(object):
 
         # Generate the second part
         print("Generating the second part...")
-        second_part = client.predict(
+        second_part = predict(
             first_part +
             "\nContinue adding slides from here. Start your response with 'Here is the presentation continuation:\n---\n\n## <next slide heading here>\n...'",  # str  in 'Message' Textbox component
             system_prompt,  # str  in 'System prompt' Textbox component
             1900,  # float (numeric value between 1 and 2048) in 'Max new tokens' Slider component
-            0.1,  # float (numeric value between 0.1 and 4.0) in 'Temperature' Slider component
-            0.05,  # float (numeric value between 0.05 and 1.0) in 'Top-p (nucleus sampling)' Slider component
-            1,  # float (numeric value between 1 and 1000) in 'Top-k' Slider component
-            1,  # float (numeric value between 1.0 and 2.0) in 'Repetition penalty' Slider component
-            api_name="/chat",
+            0.1  # float (numeric value between 0.1 and 4.0) in 'Temperature' Slider component
         )
 
         # Remove the setup and end phrases and prettify
@@ -90,28 +96,25 @@ class Generator(object):
 
         return result
 
-    def _process_markdown(self, presentation_content: str,
-                          file_format: str) -> None:
+    def _process_markdown(self, presentation_content: str) -> None:
         """
         Provided presentation content in Marp format, generates a file in the
         needed format and saves it as `presentation.<format>` in the project directory.
 
         Args:
             presentation_content: Markdown of the future presentation.
-            file_format: Format of the output file.
         """
 
         # Save presentation as a markdown file
-        with open("./presentation.md", "w") as file:
+        with open("files/presentation.md", "w") as file:
             file.write(presentation_content)
 
         print("Generating document...")
         os.system(
-            f"docker run --rm --init -v {os.getcwd()}:/home/marp/app/ -e LANG=EN marpteam/marp-cli presentation.md --{file_format}"
+            f"docker run --rm --init -v {os.getcwd()}/files:/home/marp/app/ -e LANG=EN marpteam/marp-cli presentation.md --html; docker run --rm --init -v {os.getcwd()}/files:/home/marp/app/ -e LANG=EN marpteam/marp-cli presentation.md --pdf; docker run --rm --init -v {os.getcwd()}/files:/home/marp/app/ -e LANG=EN marpteam/marp-cli presentation.md --pptx"
         )
 
     def generate_presentation(self,
-                              file_format: str,
                               title: str,
                               author: str = "",
                               theme: str = ""):
@@ -121,7 +124,6 @@ class Generator(object):
         This method first generates the presentation content in markdown format using the `_generate_presentation_content` method. Then, it processes the markdown content into the desired file format using the `_process_markdown` method.
 
         Args:
-            file_format: Format of the output file. This should be a format that Marp can convert to (e.g., 'pdf', 'pptx').
             title: Title of the presentation.
             author: Author of the presentation. Defaults to an empty string.
             theme: Theme of the presentation. Defaults to "default".
@@ -131,4 +133,4 @@ class Generator(object):
         """
         generated_content = self._generate_presentation_content(
             title, author, theme)
-        self._process_markdown(generated_content, file_format)
+        self._process_markdown(generated_content)
