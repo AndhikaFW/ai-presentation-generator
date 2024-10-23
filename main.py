@@ -69,11 +69,13 @@ async def create_files(title: str = Form(...), author: str = Form(...), theme: s
                                             <div class="pure-u-1-2">
                                                 <div>
                                                     <h3>Default:</h3>
+                                                    <img class="pure-img-responsive" src="../static/preview/default.webp">
                                                 </div>
                                             </div>
                                             <div class="pure-u-1-2">
                                                 <div>
                                                     <h3>Gaia:</h3>
+                                                    <img class="pure-img-responsive" src="../static/preview/gaia.webp">
                                                 </div>
                                             </div>
                                         </div>
