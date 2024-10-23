@@ -105,12 +105,12 @@ class Generator(object):
         """
 
         # Save presentation as a markdown file
-        with open("files/presentation.md", "w") as file:
+        with open("static/files/presentation.md", "w") as file:
             file.write(presentation_content)
 
         print("Generating document...")
         os.system(
-            f"docker run --rm --init -v {os.getcwd()}/files:/home/marp/app/ -e LANG=EN marpteam/marp-cli presentation.md --html; docker run --rm --init -v {os.getcwd()}/files:/home/marp/app/ -e LANG=EN marpteam/marp-cli presentation.md --pdf; docker run --rm --init -v {os.getcwd()}/files:/home/marp/app/ -e LANG=EN marpteam/marp-cli presentation.md --pptx"
+            f"docker run --rm --init -v {os.getcwd()}/static/files:/home/marp/app/ -e LANG=EN marpteam/marp-cli presentation.md --pdf; docker run --rm --init -v {os.getcwd()}/static/files:/home/marp/app/ -e LANG=EN marpteam/marp-cli presentation.md --pptx"
         )
 
     def generate_presentation(self,
